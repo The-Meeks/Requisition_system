@@ -1,0 +1,123 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+/* Container */
+.container {
+  width: 80%;
+  margin: auto;
+  overflow: hidden;
+  background: white;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h2 {
+  color: #333;
+}
+
+/* Navigation Menu */
+nav ul {
+  list-style: none;
+  padding: 0;
+  background: #333;
+  text-align: center;
+}
+
+nav ul li {
+  display: inline;
+  margin: 0;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: white;
+  padding: 15px 20px;
+  display: inline-block;
+}
+
+nav ul li a:hover {
+  background: #575757;
+}
+
+/* Forms */
+form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  display: inline-block;
+  text-align: left;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background: #28a745;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+}
+
+button:hover {
+  background: #218838;
+}
+
+/* Table */
+table {
+  width: 80%;
+  margin: auto;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+th {
+  background: #333;
+  color: white;
+}
+
+/* Success & Error Messages */
+.success {
+  color: green;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
