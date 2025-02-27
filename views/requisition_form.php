@@ -26,20 +26,14 @@ if (!isLoggedIn()) {
             container.appendChild(div);
         }
     </script>
-    <title>Requisition Form</title>
 </head>
 <body>
     <h2>Requisition Request</h2>
     <form method="POST" action="../controllers/requisition.php">
-        <label>Requisition Office:</label>
-        <input type="text" name="office" required><br><br>
-
-        <div id="items-container">
-            <button type="button" onclick="addItem()">Add Item</button><br><br>
-        </div>
-
+        <input type="text" name="office" placeholder="Requisition Office" required>
+        <div id="items-container"></div>
+        <button type="button" onclick="addItem()">Add Item</button>
         <button type="submit">Submit Request</button>
     </form>
-    <a href="dashboard.php">Back to Dashboard</a>
 </body>
 </html>

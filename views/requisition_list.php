@@ -8,10 +8,7 @@ if (!isLoggedIn()) {
 }
 
 $user_id = $_SESSION["user_id"];
-
-// Fetch requisitions for the logged-in user
-$query = "SELECT id, office, status, created_at FROM requisitions WHERE user_id = ?";
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare("SELECT * FROM requisitions WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -21,26 +18,22 @@ $result = $stmt->get_result();
 <html lang="en">
 <head>
     <link rel="stylesheet" href="../public/css/styles.css">
-    <title>Requisition List</title>
 </head>
 <body>
     <h2>My Requisitions</h2>
-    <table border="1">
+    <table>
         <tr>
-            <th>ID</th>
-            <th>Office</th>
+            <th>Item Name</th>
+            <th>Unit of Issue</th>
+            <th>Quantity</th>
             <th>Status</th>
-            <th>Requested On</th>
         </tr>
         <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><?= htmlspecialchars($row["id"]); ?></td>
-                <td><?= htmlspecialchars($row["office"]); ?></td>
-                <td><?= isset($row["status"]) ? htmlspecialchars($row["status"]) : "Pending"; ?></td>
-                <td><?= htmlspecialchars($row["created_at"]); ?></td>
+                <td><?= htmlspecialchars($row["office"]) ?></td>
+                <td><?= htmlspecialchars($row["status"]) ?></td>
             </tr>
         <?php endwhile; ?>
     </table>
-    <a href="dashboard.php">Back to Dashboard</a>
 </body>
 </html>
