@@ -1,49 +1,39 @@
+<?php
+session_start();
+if (isset($_SESSION["user_id"])) {
+    header("Location: dashboard.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../public/css/styles.css">
+    <title>Register</title>
+    <link rel="stylesheet" href="../public/styles.css">
 </head>
 <body>
-    <?php session_start(); ?>
-    
-    <form action="../controllers/register.php" method="post">
+    <form action="../controllers/register.php" method="POST">
         <h2>Register</h2>
-
-        <!-- Display Error Message -->
-        <?php if (isset($_SESSION['error'])): ?>
-            <p style="color: red;"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
-        <?php endif; ?>
-
-        <!-- Display Success Message -->
-        <?php if (isset($_SESSION['success'])): ?>
-            <p style="color: green;"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
-        <?php endif; ?>
-
         <label>First Name:</label>
         <input type="text" name="first_name" required>
         <label>Last Name:</label>
         <input type="text" name="last_name" required>
-        <label>Username:</label>
-        <input type="text" name="username" required>
         <label>Email:</label>
         <input type="email" name="email" required>
+        <label>Username:</label>
+        <input type="text" name="username" required>
         <label>Password:</label>
         <input type="password" name="password" required>
-
-        <label>Select Role:</label>
-        <select name="role" required>
+        <label>Role:</label>
+        <select name="role">
             <option value="requester">Requester</option>
-            <option value="head_office">Head of Office</option>
-            <option value="dda">DDA Authorization</option>
-            <option value="ddfa">DDFA Funds Approval</option>
-            <option value="ddnrc">DDNRC Approval</option>
+            <option value="head_office">Head Office</option>
+            <option value="dda">DDA</option>
+            <option value="ddfa">DDFA</option>
+            <option value="ddnrc">DDNRC</option>
             <option value="issuer">Issuer</option>
-            <option value="admin">Admin</option>
         </select>
-
         <button type="submit">Register</button>
     </form>
-    
-    <p>Already have an account? <a href="login.php">Login</a></p>
 </body>
 </html>

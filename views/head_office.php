@@ -1,86 +1,73 @@
 <?php
 session_start();
 require '../config/db.php';
-require '../controllers/auth.php';
 
-if (!isLoggedIn() || !hasRole('head_office')) {
+// Ensure the user is logged in and has the correct role
+if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== "head_office") {
+    $_SESSION["message"] = "Unauthorized access!";
     header("Location: login.php");
     exit();
 }
 
-// Fetch pending requisitions with items
-$stmt = $conn->prepare("
-    SELECT r.id, r.user_id, 
-           SUBSTRING_INDEX(u.first_name, ' ', 1) AS requested_by, 
-           r.created_at AS requested_on, 
-           GROUP_CONCAT(ri.item_name SEPARATOR ', ') AS items, 
-           GROUP_CONCAT(ri.unit SEPARATOR ', ') AS units, 
-           GROUP_CONCAT(ri.quantity SEPARATOR ', ') AS quantities, 
-           r.head_office_approval 
-    FROM requisitions r
-    JOIN users u ON r.user_id = u.id
-    JOIN requisition_items ri ON r.id = ri.requisition_id
-    WHERE r.head_office_approval = 'Pending'
-    GROUP BY r.id
-");
-$stmt->execute();
-$result = $stmt->get_result();
+// Fetch all pending requisitions
+$query = "SELECT r.id, u.first_name, u.last_name, r.office, r.created_at, 
+                 r.head_office_approval, r.head_office_approver
+          FROM requisitions r
+          JOIN users u ON r.user_id = u.id
+          WHERE r.head_office_approval = 'Pending'";
+
+$result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../public/css/styles.css">
-    <title>Head of Office Approval</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Head Office Approval</title>
+    <link rel="stylesheet" href="../public/styles.css">
 </head>
 <body>
-    <h2>Head of Office - Approve Requisitions</h2>
+    <h2>Head Office Approval</h2>
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <p class="success"><?= $_SESSION['success']; unset($_SESSION['success']); ?></p>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['error'])): ?>
-        <p class="error"><?= $_SESSION['error']; unset($_SESSION['error']); ?></p>
-    <?php endif; ?>
+    <?php
+    if (isset($_SESSION["message"])) {
+        echo "<p>{$_SESSION['message']}</p>";
+        unset($_SESSION["message"]); // Clear message after displaying
+    }
+    ?>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Requested By (User ID)</th>
-                <th>Requested On</th>
-                <th>Item</th>
-                <th>Unit</th>
-                <th>Quantity</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
+    <table border="1">
+        <tr>
+            <th>Requester</th>
+            <th>Office</th>
+            <th>Request Date</th>
+            <th>Approval Status</th>
+            <th>Action</th>
+        </tr>
+
+        <?php if ($result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?= htmlspecialchars($row['id']); ?></td>
-                    <td><?= htmlspecialchars($row['requested_by']); ?></td>
-                    <td><?= htmlspecialchars($row['requested_on']); ?></td>
-                    <td><?= htmlspecialchars($row['items'] ?? 'N/A'); ?></td>
-<td><?= htmlspecialchars($row['units'] ?? 'N/A'); ?></td>
-<td><?= htmlspecialchars($row['quantities'] ?? 'N/A'); ?></td>
+                    <td><?= htmlspecialchars($row['first_name'] . " " . $row['last_name']) ?></td>
+                    <td><?= htmlspecialchars($row['office']) ?></td>
+                    <td><?= htmlspecialchars($row['created_at']) ?></td>
+                    <td><?= htmlspecialchars($row['head_office_approval']) ?></td>
                     <td>
-                        <form action="../controllers/head_office_approval.php" method="POST">
-                            <input type="hidden" name="requisition_id" value="<?= htmlspecialchars($row['id']); ?>">
-                            <button type="submit" name="decision" value="Recommended">Recommend</button>
-                            <button type="submit" name="decision" value="Not Recommended">Do Not Recommend</button>
+                        <form method="POST" action="../controllers/head_office_approval.php">
+                            <input type="hidden" name="requisition_id" value="<?= $row['id'] ?>">
+                            <button type="submit" name="approval" value="Recommended">Recommend</button>
+                            <button type="submit" name="approval" value="Not Recommended">Not Recommend</button>
                         </form>
                     </td>
                 </tr>
-                <!-- Debugging: Print raw data -->
-              <!--  <tr>
-                    <td colspan="7"><pre> ?></pre></td>
-                </tr> -->
             <?php endwhile; ?>
-        </tbody>
+        <?php else: ?>
+            <tr><td colspan="5">No pending requisitions.</td></tr>
+        <?php endif; ?>
     </table>
 
+    <br>
     <a href="dashboard.php">Back to Dashboard</a>
 </body>
 </html>

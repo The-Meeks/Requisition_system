@@ -1,42 +1,31 @@
 <?php
-// Start session if not already started
-if (session_status() == PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require '../config/db.php';
-
-/**
- * Check if user is logged in
- */
-function isLoggedIn() {
-    return isset($_SESSION["user_id"]);
-}
-
-/**
- * Check if user has a specific role
- */
-function hasRole($role) {
-    return isset($_SESSION["role"]) && $_SESSION["role"] === $role;
-}
-
-/**
- * Redirect user to login page if not logged in
- */
-function requireLogin() {
-    if (!isLoggedIn()) {
+// Redirect to login if the user is not logged in
+function check_auth() { 
+    if (!isset($_SESSION["user_id"])) {
+        $_SESSION["message"] = "Unauthorized access!";
         header("Location: ../views/login.php");
         exit();
     }
 }
 
-/**
- * Logout function
- */
-function logout() {
-    session_unset(); // Remove session variables
-    session_destroy(); // Destroy session
-    header("Location: ../index.php");
+// Restrict access to specific roles
+function check_role($allowed_roles) {
+    if (!isset($_SESSION["role"]) || !in_array($_SESSION["role"], $allowed_roles)) {
+        $_SESSION["message"] = "Unauthorized access!";
+        header("Location: ../index.php");
+        exit();
+    }
+}
+
+// Logout function
+function logout() { 
+    session_unset();
+    session_destroy();
+    header("Location: ../views/login.php");
     exit();
 }
 ?>

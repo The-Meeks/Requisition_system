@@ -1,23 +1,51 @@
 <?php
-require '../config/db.php';
 session_start();
+require '../config/db.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION["user_id"])) {
+// Ensure user is logged in
+if (!isset($_SESSION["user_id"])) {
+    $_SESSION["message"] = "Unauthorized access!";
+    header("Location: ../views/login.php");
+    exit();
+}
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION["user_id"];
     $office = $_POST["office"];
     $items = $_POST["items"];
 
-    $stmt = $conn->prepare("INSERT INTO requisitions (user_id, office, status) VALUES (?, ?, 'pending')");
-    $stmt->bind_param("is", $user_id, $office);
-    $stmt->execute();
-    $requisition_id = $stmt->insert_id;
-
-    foreach ($items as $item) {
-        $stmt = $conn->prepare("INSERT INTO requisition_items (requisition_id, item_name, unit, quantity, remarks) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("issis", $requisition_id, $item["name"], $item["unit"], $item["quantity"], $item["remarks"]);
-        $stmt->execute();
+    // Validate input
+    if (empty($office) || empty($items)) {
+        $_SESSION["message"] = "All fields are required!";
+        header("Location: ../views/requisition_form.php");
+        exit();
     }
 
-    header("Location: ../views/requisition_list.php");
+    // Insert into `requisitions` table
+    $stmt = $conn->prepare("INSERT INTO requisitions (user_id, office, status, created_at) VALUES (?, ?, 'Pending', NOW())");
+    $stmt->bind_param("is", $user_id, $office);
+    
+    if ($stmt->execute()) {
+        $requisition_id = $stmt->insert_id;
+
+        // Insert multiple items into `requisition_items` table
+        $stmt_items = $conn->prepare("INSERT INTO requisition_items (requisition_id, item_name, unit, quantity, remarks) VALUES (?, ?, ?, ?, ?)");
+
+        foreach ($items as $item) {
+            if (!empty($item["name"]) && !empty($item["unit"]) && !empty($item["quantity"])) {
+                $stmt_items->bind_param("issis", $requisition_id, $item["name"], $item["unit"], $item["quantity"], $item["remarks"]);
+                $stmt_items->execute();
+            }
+        }
+
+        $_SESSION["message"] = "Requisition submitted successfully!";
+        header("Location: ../views/requisition_list.php");
+        exit();
+    } else {
+        $_SESSION["message"] = "Error submitting requisition.";
+        header("Location: ../views/requisition_form.php");
+        exit();
+    }
 }
 ?>

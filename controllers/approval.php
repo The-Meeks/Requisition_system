@@ -1,24 +1,29 @@
 <?php
+session_start();
 require '../config/db.php';
-require 'auth.php';
+require '../controllers/auth.php';
 
-if (!isLoggedIn() || $_SESSION["role"] !== "head_office") {
-    die("Unauthorized access.");
+// Ensure user is logged in and has the appropriate role
+if (!isLoggedIn() || !hasRole('head_office')) {
+    $_SESSION['error'] = "Unauthorized access. Please log in to continue.";
+
+    header("Location: ../views/login.php");
+    exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $requisition_id = $_POST["requisition_id"];
-    $recommendation = $_POST["recommendation"];
-    $approver_name = $_SESSION["user_id"];
-    $date = date("Y-m-d H:i:s");
-
-    $stmt = $conn->prepare("UPDATE requisitions SET head_office_approval = ?, head_office_name = ?, head_office_date = ? WHERE id = ?");
-    $stmt->bind_param("sssi", $recommendation, $approver_name, $date, $requisition_id);
+// Example of approving a requisition
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['requisition_id'])) {
+    $requisition_id = intval($_POST['requisition_id']);
+    $stmt = $conn->prepare("UPDATE requisitions SET head_office_approval = 'Approved' WHERE id = ?");
+    $stmt->bind_param("i", $requisition_id);
 
     if ($stmt->execute()) {
-        echo "Requisition recommended successfully.";
+        $_SESSION['success'] = "Requisition approved successfully.";
     } else {
-        echo "Error: " . $stmt->error;
+    $_SESSION['error'] = "Error approving requisition. Please try again later.";
+
     }
+    header("Location: ../views/head_office.php");
+    exit();
 }
 ?>

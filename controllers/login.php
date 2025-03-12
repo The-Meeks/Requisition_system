@@ -3,21 +3,28 @@ session_start();
 require '../config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = $_POST["username"];
+    $password = $_POST["password"];
 
-    $stmt = $conn->prepare("SELECT id, password, role FROM users WHERE username=?");
+    $stmt = $conn->prepare("SELECT id, username, role FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
-    $stmt->store_result();
-    $stmt->bind_result($id, $hashed_password, $role);
+    $result = $stmt->get_result();
 
-    if ($stmt->fetch() && password_verify($password, $hashed_password)) {
-        $_SESSION['user_id'] = $id;
-        $_SESSION['role'] = $role;
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
+        
+        // Store user details in session
+        $_SESSION["user_id"] = $user["id"];
+        $_SESSION["username"] = $user["username"];
+        $_SESSION["role"] = $user["role"];
+
         header("Location: ../views/dashboard.php");
+        exit();
     } else {
-        echo "Invalid login details.";
+        $_SESSION["message"] = "Invalid credentials!";
+        header("Location: ../views/login.php");
+        exit();
     }
 }
 ?>

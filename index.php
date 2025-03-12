@@ -1,12 +1,18 @@
 <?php
 session_start();
-
-// Check if the user is logged in
-if (isset($_SESSION['user_id'])) {
-    header("Location: views/dashboard.php"); // Redirect to dashboard if logged in
-    exit();
-} else {
-    header("Location: views/login.php"); // Redirect to login if not logged in
+if (isset($_SESSION["user_id"])) {
+    header("Location: views/dashboard.php");
     exit();
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <h2>Welcome to the Requisition System</h2>
+    <a href="views/login.php">Login</a> | <a href="views/register.php">Register</a>
+</body>
+</html>
